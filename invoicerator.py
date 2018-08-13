@@ -1,14 +1,16 @@
 from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
+from userData import *
+
 document = Document()
 
-document.add_heading('Marco Salsiccia')
+document.add_heading(userName)
 
 header = document.add_paragraph()
-header.add_run("901 Santiago St.\n")
-header.add_run("San Francisco CA 94116\n")
-header.add_run('408-314-5401\n')
-header.add_run('marco.salsiccia@gmail.com')
+header.add_run(userStreetAddress+'\n')
+header.add_run(userCityStateZip+'\n')
+header.add_run(userPhone+'\n')
+header.add_run(userEmail+'\n')
 
 document.add_paragraph()
 
