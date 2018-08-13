@@ -9,14 +9,17 @@ header.add_run("901 Santiago St.\n")
 header.add_run("San Francisco CA 94116\n")
 header.add_run('408-314-5401\n')
 header.add_run('marco.salsiccia@gmail.com')
+
 document.add_paragraph()
 
-document.add_heading('Invoice', level=2).alignment=WD_ALIGN_PARAGRAPH.CENTER
+document.add_heading('INVOICE', level=2).alignment=WD_ALIGN_PARAGRAPH.CENTER
+document.add_paragraph()
 
 print "Invoicerator 1.0\nGenerate invoices as Word Documents."
 print "Who is this invoice for?"
 invClient = raw_input("Company Name >")
-clientP = document.add_paragraph('Invoicing to: ')
+clientP = document.add_paragraph()
+clientP.add_run('Invoicing to: ').bold=True
 clientP.add_run(invClient)
 
 table = document.add_table(rows=1, cols=3)
@@ -68,4 +71,9 @@ payment.add_run("$%d" %total)
 document.add_paragraph()
 
 document.add_paragraph('Total is due within 30 days of receiving this invoice.')
-document.save('GeneratedInvoice.docx')
+
+print "What do you want to name your invoice? .docx will be automatically appended."
+filename = raw_input('>') + '.docx'
+document.save(filename)
+
+print "Invoice saved as %s. Goodbye!" %filename
