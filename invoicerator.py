@@ -3,10 +3,14 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 document = Document()
 
 document.add_heading('Marco Salsiccia')
-document.add_paragraph('901 Santiago St.')
-document.add_paragraph('San Francisco CA 94116')
-document.add_paragraph('408-314-5401')
-document.add_paragraph('marco.salsiccia@gmail.com')
+
+header = document.add_paragraph()
+header.add_run("901 Santiago St.\n")
+header.add_run("San Francisco CA 94116\n")
+header.add_run('408-314-5401\n')
+header.add_run('marco.salsiccia@gmail.com')
+document.add_paragraph()
+
 document.add_heading('Invoice', level=2).alignment=WD_ALIGN_PARAGRAPH.CENTER
 
 print "Invoicerator 1.0\nGenerate invoices as Word Documents."
