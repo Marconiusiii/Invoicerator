@@ -39,25 +39,27 @@ while True:
 	totalRows += 1
 	print "Date of Service:"
 	date = raw_input("mm/dd/yy >")
-	print "Client:"
-	client = raw_input(">")
+	print "Project:"
+	project = raw_input(">")
 	print "Hours worked:"
 	hours = raw_input(">")
 	hoursWorked += int(hours)
 
-	print "Date: %s, Client: %s, Hours: %s" %(date, client, hours)
+	print "Date: %s, Project: %s, Hours: %s" %(date, project, hours)
 	entry = table.rows[totalRows]
 	entry.cells[0].text = date
-	entry.cells[1].text = client
+	entry.cells[1].text = project
 	entry.cells[2].text = hours
-	print "Anything more to log?"
-	answer = raw_input("y/n")
-	if answer == 'y':
+	print "Anything more to log? y/n"
+	answer = raw_input(">")
+	if answer in ['y', 'Y', 'yes', 'Yes']:
 		continue
 	else:
 		print "Ok, finished making your table."
 		break
-rate = input("What is your rate? >")
+
+print "What is your hourly rate?"
+rate = input("$>")
 total = hoursWorked * rate
 print "You are owed $%d." %total
 
