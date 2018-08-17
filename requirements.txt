@@ -1,2 +1,1 @@
-Invoicerator
 python-docx==0.8.6
