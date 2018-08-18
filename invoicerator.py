@@ -4,6 +4,11 @@ from userData import *
 
 document = Document()
 
+print "Invoicerator 1.0\nGenerate invoices as Word Documents."
+print "Who is this invoice for?"
+invClient = raw_input("Company Name >")
+
+
 document.add_heading(userName)
 
 header = document.add_paragraph()
@@ -16,10 +21,6 @@ document.add_paragraph()
 
 document.add_heading('INVOICE', level=2).alignment=WD_ALIGN_PARAGRAPH.CENTER
 document.add_paragraph()
-
-print "Invoicerator 1.0\nGenerate invoices as Word Documents."
-print "Who is this invoice for?"
-invClient = raw_input("Company Name >")
 clientP = document.add_paragraph()
 clientP.add_run('Invoicing to: ').bold=True
 clientP.add_run(invClient)
@@ -52,10 +53,10 @@ while True:
 	entry.cells[2].text = hours
 	print "Anything more to log? y/n"
 	answer = raw_input(">")
-	if answer in ['y', 'Y', 'yes', 'Yes']:
+	if answer.lower().startswith('y'):
 		continue
 	else:
-		print "Ok, finished making your table."
+		print "Ok, finished making your invoice table."
 		break
 
 print "What is your hourly rate?"
