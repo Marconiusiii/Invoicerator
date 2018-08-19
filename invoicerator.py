@@ -33,7 +33,7 @@ headerCells[1].text = 'Project'
 headerCells[2].text = 'Hours'
 
 totalRows = 0
-hoursWorked = 0
+hoursWorked = 0.00
 
 while True:
 	table.add_row()
@@ -42,15 +42,15 @@ while True:
 	date = raw_input("mm/dd/yy >")
 	print "Project:"
 	project = raw_input(">")
-	print "Hours worked:"
-	hours = raw_input(">")
-	hoursWorked += int(hours)
+	print "Hours worked in 0.25 increments:"
+	hours = input(">") + 0.00
+	hoursWorked += hours
 
-	print "Date: %s, Project: %s, Hours: %s" %(date, project, hours)
+	print "Date: %s, Project: %s, Hours: %i" %(date, project, hours)
 	entry = table.rows[totalRows]
 	entry.cells[0].text = date
 	entry.cells[1].text = project
-	entry.cells[2].text = hours
+	entry.cells[2].text = str(hours)
 	print "Anything more to log? y/n"
 	answer = raw_input(">")
 	if answer.lower().startswith('y'):
@@ -61,18 +61,21 @@ while True:
 
 print "What is your hourly rate?"
 rate = input("$>")
+format(rate, '.2f')
 total = hoursWorked * rate
-print "You are owed $%d." %total
+format(total, '.2f')
+
+print "You are owed $%i." %total
 
 rateP = document.add_paragraph()
 rateP.add_run("Rate: ").bold=True
-rateP.add_run("$%d" %rate)
+rateP.add_run("$%r" %rate)
 tHours = document.add_paragraph()
 tHours.add_run("Total Hours: ").bold=True
-tHours.add_run('%s' %hoursWorked)
+tHours.add_run('%r' %hoursWorked)
 payment = document.add_paragraph()
 payment.add_run("Total Owed: ").bold=True
-payment.add_run("$%d" %total)
+payment.add_run("$%r" %(total * 1.00))
 document.add_paragraph()
 
 document.add_paragraph('Total is due within 30 days of receiving this invoice.')
