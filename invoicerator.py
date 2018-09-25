@@ -39,18 +39,23 @@ while True:
 	table.add_row()
 	totalRows += 1
 	print "Date of Service:"
-	date = raw_input("mm/dd/yy >")
+	date = raw_input("MM/DD/YY >")
 	print "Project:"
 	project = raw_input(">")
 	print "Hours worked in 0.25 increments:"
-	hours = input(">") + 0.00
+	hours = input(">")
 	hoursWorked += hours
 
 	print "Date: %s, Project: %s, Hours: %i" %(date, project, hours)
-	entry = table.rows[totalRows]
-	entry.cells[0].text = date
-	entry.cells[1].text = project
-	entry.cells[2].text = str(hours)
+	print "Does that look correct?"
+	check = raw_input("y/n >")
+	if check.lower().startswith('y'):
+		entry = table.rows[totalRows]
+		entry.cells[0].text = date
+		entry.cells[1].text = project
+		entry.cells[2].text = str(hours)
+	else:
+		continue
 	print "Anything more to log? y/n"
 	answer = raw_input(">")
 	if answer.lower().startswith('y'):
