@@ -46,7 +46,7 @@ while True:
 	hours = input(">")
 	hoursWorked += hours
 
-	print "Date: %s, Project: %s, Hours: %i" %(date, project, hours)
+	print "Date: %s, Project: %s, Hours: %r" %(date, project, hours)
 	print "Does that look correct?"
 	check = raw_input("y/n >")
 	if check.lower().startswith('y'):
