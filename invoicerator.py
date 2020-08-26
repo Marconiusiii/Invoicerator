@@ -4,10 +4,23 @@ from userData import *
 
 document = Document()
 
-print "Invoicerator 1.0\nGenerate invoices as Word Documents."
+print "Invoicerator 1.1\nGenerate invoices as Word Documents.\nBy: Marco Salsiccia"
 print "Who is this invoice for?"
-invClient = raw_input("Company Name >")
 
+while True:
+	try:
+		invClient = raw_input("Company Name >")
+	except ValueError:
+		print "Invalid entry. Try again."
+		continue
+	print "Invoice is for: {}".format(invClient)
+	print "Type 'c' and hit Enter to Confirm, or just hit Enter to try again."
+	try:
+		choice = raw_input('>')
+	except ValueError:
+		continue
+	if choice.lower() == 'c':
+		break
 
 document.add_heading(userName)
 
@@ -46,7 +59,7 @@ while True:
 	hours = input(">")
 	hoursWorked += hours
 
-	print "Date: %s, Project: %s, Hours: %r" %(date, project, hours)
+	print "Date: {date}, Project: {project}, Hours: {hrs}".format(date=date, project=project, hrs=hours)
 	print "Does that look correct?"
 	check = raw_input("y/n >")
 	if check.lower().startswith('y'):
@@ -55,6 +68,7 @@ while True:
 		entry.cells[1].text = project
 		entry.cells[2].text = str(hours)
 	else:
+		print "Ok, redoing your entry."
 		continue
 	print "Anything more to log? y/n"
 	answer = raw_input(">")
@@ -83,10 +97,10 @@ payment.add_run("Total Owed: ").bold=True
 payment.add_run("$%r" %(total * 1.00))
 document.add_paragraph()
 
-document.add_paragraph('Total is due within 30 days of receiving this invoice.')
+document.add_paragraph('Total is due within 14 days of receiving this invoice.')
 
 print "What do you want to name your invoice? .docx will be automatically appended."
 filename = raw_input('>') + '.docx'
 document.save(filename)
 
-print "Invoice saved as %s. Goodbye!" %filename
+print "Invoice saved as {}. Goodbye!".format(filename)
