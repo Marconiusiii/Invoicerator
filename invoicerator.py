@@ -1,18 +1,25 @@
 from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.shared import Pt
 from userData import *
+date = project = ""
+hours = 0.0
+invNumber = 0
+def userEntry():
+	while True:
+		try:
+			return raw_input('>')
+		except ValueError:
+			print "Oh no! Invalid entry, try again."
+			continue
 
 document = Document()
 
 print "Invoicerator 1.1\nGenerate invoices as Word Documents.\nBy: Marco Salsiccia"
-print "Who is this invoice for?"
 
 while True:
-	try:
-		invClient = raw_input("Company Name >")
-	except ValueError:
-		print "Invalid entry. Try again."
-		continue
+	print "Who is receiving this invoice?"
+	invClient = userEntry()
 	print "Invoice is for: {}".format(invClient)
 	print "Type 'c' and hit Enter to Confirm, or just hit Enter to try again."
 	try:
@@ -22,21 +29,36 @@ while True:
 	if choice.lower() == 'c':
 		break
 
-document.add_heading(userName)
+print "What's the Invoice Number?"
+invNumber = userEntry()
+
+#Begin Formatting
+title = document.add_heading().add_run(userName)
+titleFont = title.font
+titleFont.name = 'Helvetica'
+titleFont.size = Pt(18)
 
 header = document.add_paragraph()
-header.add_run(userStreetAddress+'\n')
-header.add_run(userCityStateZip+'\n')
-header.add_run(userPhone+'\n')
-header.add_run(userEmail+'\n')
-
+uTitle = header.add_run(userStreetAddress+'\n'+userCityStateZip+'\n'+userPhone+'\n'+userEmail+'\n')
+underTitle = uTitle.font
+underTitle.name = 'Helvetica'
+underTitle.size = Pt(11)
 document.add_paragraph()
 
 document.add_heading('INVOICE', level=2).alignment=WD_ALIGN_PARAGRAPH.CENTER
 document.add_paragraph()
 clientP = document.add_paragraph()
-clientP.add_run('Invoicing to: ').bold=True
-clientP.add_run(invClient)
+inTo = clientP.add_run('Invoicing to: ')
+inTo2 = clientP.add_run(invClient)
+clientP.add_run('\n')
+inNum = clientP.add_run('Invoice #')
+inNum2 = clientP.add_run(invNumber)
+fontInTo = inTo.font
+fontInTo2 = inTo2.font
+fontInNum = inNum.font
+fontInNum2 = inNum2.font
+fontInTo.name = fontInTo2.name = fontInNum.name = fontInNum2.name = 'Helvetica'
+fontInTo.bold = fontInNum.bold = True
 
 table = document.add_table(rows=1, cols=3)
 
@@ -51,18 +73,26 @@ hoursWorked = 0.00
 while True:
 	table.add_row()
 	totalRows += 1
-	print "Date of Service:"
-	date = raw_input("MM/DD/YY >")
+	print "Date of Service (MM/DD/YYYY):"
+	date = userEntry()
 	print "Project:"
-	project = raw_input(">")
+	project = userEntry()
 	print "Hours worked in 0.25 increments:"
-	hours = input(">")
+	while True:
+		try:
+			hours = input(">")
+			break
+		except ValueError:
+			print "Invalid! Try again!"
+			continue
 	hoursWorked += hours
 
 	print "Date: {date}, Project: {project}, Hours: {hrs}".format(date=date, project=project, hrs=hours)
 	print "Does that look correct?"
-	check = raw_input("y/n >")
+
+	check = userEntry()
 	if check.lower().startswith('y'):
+		print "Great, creating entry."
 		entry = table.rows[totalRows]
 		entry.cells[0].text = date
 		entry.cells[1].text = project
@@ -71,7 +101,13 @@ while True:
 		print "Ok, redoing your entry."
 		continue
 	print "Anything more to log? y/n"
-	answer = raw_input(">")
+	while True:
+		try:
+			answer = raw_input(">")
+			break
+		except ValueError:
+			print "Whoops, you broke it. Try again."
+			continue
 	if answer.lower().startswith('y'):
 		continue
 	else:
@@ -79,28 +115,55 @@ while True:
 		break
 
 print "What is your hourly rate?"
-rate = input("$>")
+rate = int(userEntry())
 format(rate, '.2f')
 total = hoursWorked * rate
 format(total, '.2f')
 
-print "You are owed $%i." %total
+print "You are owed ${:0.2F}.".format(total)
 
 rateP = document.add_paragraph()
-rateP.add_run("Rate: ").bold=True
-rateP.add_run("$%r" %rate)
+rt = rateP.add_run("Rate: ")
+rt2 = rateP.add_run("${:0.2F}".format(rate))
+rtFont = rt.font
+rt2Font = rt2.font
+rtFont.name = rt2Font.name = 'Helvetica'
+rtFont.bold = True
+
 tHours = document.add_paragraph()
-tHours.add_run("Total Hours: ").bold=True
-tHours.add_run('%r' %hoursWorked)
+totHours = tHours.add_run("Total Hours: ")
+totHours2 = tHours.add_run('{}'.format(hoursWorked))
+tH = totHours.font
+tH2 = totHours2.font
+tH.name = tH2.name = 'Helvetica'
+tH.bold = True
+
 payment = document.add_paragraph()
-payment.add_run("Total Owed: ").bold=True
-payment.add_run("$%r" %(total * 1.00))
+pay = payment.add_run("Total Owed: ")
+pay2 = payment.add_run("${:0.2F}".format(total))
+payFont = pay.font
+pay2Font = pay2.font
+payFont.name = pay2Font.name = 'Helvetica'
+payFont.bold = True
+
 document.add_paragraph()
 
-document.add_paragraph('Total is due within 14 days of receiving this invoice.')
+late = document.add_paragraph().add_run(userLateFees)
+lateFont = late.font
+lateFont.name = 'Helvetica'
+
+howToPay = document.add_paragraph().add_run(userPay)
+howFont = howToPay.font
+howFont.name = 'Helvetica'
 
 print "What do you want to name your invoice? .docx will be automatically appended."
-filename = raw_input('>') + '.docx'
-document.save(filename)
+while True:
+	try:
+		filename = raw_input('>') + '.docx'
+		document.save(filename)
+		break
+	except ValueError:
+		print "That filename didn't work, try again."
+		continue
 
 print "Invoice saved as {}. Goodbye!".format(filename)
