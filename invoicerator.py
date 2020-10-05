@@ -1,13 +1,7 @@
 from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.shared import Pt
-
-print("Is this for Marco or Re-Access?")
-loadIn = input(">")
-if loadIn == 'm':
-	from marco import *
-elif loadIn == 'r':
-	from reaccess import *
+from userdata import *
 date = project = ""
 hours = 0.0
 invNumber = 0
