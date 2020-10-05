@@ -1,35 +1,41 @@
 from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.shared import Pt
-from userData import *
+
+print("Is this for Marco or Re-Access?")
+loadIn = input(">")
+if loadIn == 'm':
+	from marco import *
+elif loadIn == 'r':
+	from reaccess import *
 date = project = ""
 hours = 0.0
 invNumber = 0
 def userEntry():
 	while True:
 		try:
-			return raw_input('>')
+			return input('>')
 		except ValueError:
-			print "Oh no! Invalid entry, try again."
+			print("Oh no! Invalid entry, try again.")
 			continue
 
 document = Document()
 
-print "Invoicerator 1.1\nGenerate invoices as Word Documents.\nBy: Marco Salsiccia"
+print("Invoicerator 1.2\nGenerate invoices as Word Documents.\nBy: Marco Salsiccia")
 
 while True:
-	print "Who is receiving this invoice?"
+	print("Who is receiving this invoice?")
 	invClient = userEntry()
-	print "Invoice is for: {}".format(invClient)
-	print "Type 'c' and hit Enter to Confirm, or just hit Enter to try again."
+	print("Invoice is for: {}".format(invClient))
+	print("Type 'c' and hit Enter to Confirm, or just hit Enter to try again.")
 	try:
-		choice = raw_input('>')
+		choice = input('>')
 	except ValueError:
 		continue
 	if choice.lower() == 'c':
 		break
 
-print "What's the Invoice Number?"
+print("What's the Invoice Number?")
 invNumber = userEntry()
 
 #Begin Formatting
@@ -73,54 +79,54 @@ hoursWorked = 0.00
 while True:
 	table.add_row()
 	totalRows += 1
-	print "Date of Service (MM/DD/YYYY):"
+	print("Date of Service (MM/DD/YYYY):")
 	date = userEntry()
-	print "Project:"
+	print("Project:")
 	project = userEntry()
-	print "Hours worked in 0.25 increments:"
+	print("Hours worked in 0.25 increments:")
 	while True:
 		try:
-			hours = input(">")
+			hours = float(input(">"))
 			break
 		except ValueError:
-			print "Invalid! Try again!"
+			print("Invalid! Try again!")
 			continue
 	hoursWorked += hours
 
-	print "Date: {date}, Project: {project}, Hours: {hrs}".format(date=date, project=project, hrs=hours)
-	print "Does that look correct?"
+	print("Date: {date}, Project: {project}, Hours: {hrs}".format(date=date, project=project, hrs=hours))
+	print("Does that look correct?")
 
 	check = userEntry()
 	if check.lower().startswith('y'):
-		print "Great, creating entry."
+		print("Great, creating entry.")
 		entry = table.rows[totalRows]
 		entry.cells[0].text = date
 		entry.cells[1].text = project
 		entry.cells[2].text = str(hours)
 	else:
-		print "Ok, redoing your entry."
+		print("Ok, redoing your entry.")
 		continue
-	print "Anything more to log? y/n"
+	print("Anything more to log? y/n")
 	while True:
 		try:
-			answer = raw_input(">")
+			answer = input(">")
 			break
 		except ValueError:
-			print "Whoops, you broke it. Try again."
+			print("Whoops, you broke it. Try again.")
 			continue
-	if answer.lower().startswith('y'):
+	if answer.lower() in ['y', 'yes']:
 		continue
 	else:
-		print "Ok, finished making your invoice table."
+		print("Ok, finished making your invoice table.")
 		break
 
-print "What is your hourly rate?"
+print("What is your hourly rate?")
 rate = int(userEntry())
 format(rate, '.2f')
 total = hoursWorked * rate
 format(total, '.2f')
 
-print "You are owed ${:0.2F}.".format(total)
+print("You are owed ${:0.2F}.".format(total))
 
 rateP = document.add_paragraph()
 rt = rateP.add_run("Rate: ")
@@ -156,14 +162,14 @@ howToPay = document.add_paragraph().add_run(userPay)
 howFont = howToPay.font
 howFont.name = 'Helvetica'
 
-print "What do you want to name your invoice? .docx will be automatically appended."
+print("What do you want to name your invoice? .docx will be automatically appended.")
 while True:
 	try:
-		filename = raw_input('>') + '.docx'
+		filename = input('>') + '.docx'
 		document.save(filename)
 		break
 	except ValueError:
-		print "That filename didn't work, try again."
+		print("That filename didn't work, try again.")
 		continue
 
-print "Invoice saved as {}. Goodbye!".format(filename)
+print("Invoice saved as {}. Goodbye!".format(filename))
