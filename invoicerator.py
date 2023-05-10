@@ -1,7 +1,7 @@
 from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.shared import Pt
-from userdata import *
+from userData import *
 date = project = ""
 hours = 0.0
 invNumber = 0
@@ -11,21 +11,21 @@ def userEntry():
 			return input('>')
 		except ValueError:
 			print("Oh no! Invalid entry, try again.")
-			continue
+
 
 document = Document()
 
-print("Invoicerator 1.2\nGenerate invoices as Word Documents.\nBy: Marco Salsiccia")
+print("Invoicerator 1.3\nGenerate invoices as Word Documents.\nBy: Marco Salsiccia")
 
 while True:
 	print("Who is receiving this invoice?")
 	invClient = userEntry()
-	print("Invoice is for: {}".format(invClient))
+	print(f"Invoice is for: {invClient}")
 	print("Type 'c' and hit Enter to Confirm, or just hit Enter to try again.")
 	try:
 		choice = input('>')
 	except ValueError:
-		continue
+		print("Invalid entry!")
 	if choice.lower() == 'c':
 		break
 
@@ -84,10 +84,9 @@ while True:
 			break
 		except ValueError:
 			print("Invalid! Try again!")
-			continue
 	hoursWorked += hours
 
-	print("Date: {date}, Project: {project}, Hours: {hrs}".format(date=date, project=project, hrs=hours))
+	print(f"Date: {date}, Project: {project}, Hours: {hours}")
 	print("Does that look correct?")
 
 	check = userEntry()
@@ -100,14 +99,14 @@ while True:
 	else:
 		print("Ok, redoing your entry.")
 		continue
-	print("Anything more to log? y/n")
+	print("Anything more to log? y/n ")
 	while True:
 		try:
 			answer = input(">")
 			break
 		except ValueError:
 			print("Whoops, you broke it. Try again.")
-			continue
+
 	if answer.lower() in ['y', 'yes']:
 		continue
 	else:
@@ -120,7 +119,7 @@ format(rate, '.2f')
 total = hoursWorked * rate
 format(total, '.2f')
 
-print("You are owed ${:0.2F}.".format(total))
+print(f"You are owed ${total:0.2F}.")
 
 rateP = document.add_paragraph()
 rt = rateP.add_run("Rate: ")
@@ -164,6 +163,5 @@ while True:
 		break
 	except ValueError:
 		print("That filename didn't work, try again.")
-		continue
 
-print("Invoice saved as {}. Goodbye!".format(filename))
+print(f"Invoice saved as {filename}. Goodbye!")
