@@ -346,7 +346,7 @@ def main(argv: Optional[Iterable[str]] = None) -> int:
     try:
         args = parse_args(argv)
 
-        print("Invoicerator 2.0")
+        print("Invoicerator 3.0")
         print("Generate invoice DOCX files from Terminal.")
 
         profile = load_profile(args.profile)
