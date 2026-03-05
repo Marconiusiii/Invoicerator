@@ -198,7 +198,6 @@ def load_profile(profile_path: Optional[Path]) -> UserProfile:
 
 def gather_invoice_data() -> InvoiceData:
     today = datetime.now().strftime("%m/%d/%Y")
-    due_default = (datetime.now() + timedelta(days=DEFAULT_DUE_DAYS)).strftime("%m/%d/%Y")
 
     client = prompt_text("Client name")
     invoice_number = prompt_text("Invoice number")
@@ -224,7 +223,9 @@ def gather_invoice_data() -> InvoiceData:
 
     hourly_rate = prompt_decimal("Hourly rate")
     submitted_date = prompt_date("Date submitted", default=today)
-    due_date = prompt_date("Payment due date", default=due_default)
+    submitted_dt = datetime.strptime(submitted_date, "%m/%d/%Y")
+    due_date = (submitted_dt + timedelta(days=DEFAULT_DUE_DAYS)).strftime("%m/%d/%Y")
+    print(f"Payment due date ({DEFAULT_DUE_DAYS} days): {due_date}")
 
     return InvoiceData(
         client=client,
