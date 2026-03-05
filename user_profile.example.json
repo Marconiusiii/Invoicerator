@@ -1,0 +1,9 @@
+{
+  "name": "Your Name",
+  "street_address": "123 Main St",
+  "city_state_zip": "City, ST 00000",
+  "phone": "555-555-5555",
+  "email": "you@example.com",
+  "late_fees": "Payment due within 30 days of invoice receipt.",
+  "payment_instructions": "Checks payable to Your Name."
+}
