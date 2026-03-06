@@ -14,27 +14,23 @@ pip install -r requirements.txt
 ```
 
 ## Profile Setup
-Recommended setup:
+Legacy mode is supported with `userData.py`.
 
-```bash
-cp user_profile.example.json user_profile.json
-```
+Optional logo fields in `userData.py`:
+- `userLogoPath = ""`
+- `userLogoWidthInches = 1.5`
+- `userLogoAltText = "M3 Logo"`
 
-Then edit `user_profile.json` with your details.
-
-Legacy mode is still supported with `userData.py`.
+Logo behavior:
+- If `userLogoPath` is empty, no logo is rendered.
+- If `userLogoPath` is set, logo alt text is required.
+- The logo is placed in the top-right of a 2-column header table.
 
 ## Usage
 Run interactively:
 
 ```bash
 python3 invoicerator.py
-```
-
-Use an explicit profile and output path:
-
-```bash
-python3 invoicerator.py --profile user_profile.json --output invoices/acme-mar-2026.docx
 ```
 
 ## Notes On PDF
@@ -46,6 +42,8 @@ This script only generates `.docx` invoices. PDF export remains a separate step 
 - `Decimal` arithmetic for money and hours.
 - Better error handling for missing profile data and invalid input.
 - Backward compatibility with existing `userData.py`.
+- Automatic due date calculation from submitted date plus 30 days.
+- Optional logo support with required alt text when logo is enabled.
 
 ## Roadmap Ideas
 1. Add optional non-interactive flags for faster repeated invoicing.

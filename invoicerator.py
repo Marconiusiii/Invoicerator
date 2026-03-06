@@ -7,11 +7,12 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
+from typing import Any
 from typing import Iterable, Optional
 
 from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
-from docx.shared import Pt
+from docx.shared import Inches, Pt
 
 
 DEFAULT_FONT = "Helvetica"
@@ -27,6 +28,9 @@ class UserProfile:
     email: str
     late_fees: str = ""
     payment_instructions: str = ""
+    logo_path: str = ""
+    logo_width_inches: float = 1.5
+    logo_alt_text: str = "M3 Logo"
 
 
 @dataclass(frozen=True)
@@ -129,6 +133,12 @@ def apply_run_style(run, *, bold: bool = False, size: int = 12) -> None:
     run.bold = bold
 
 
+def set_inline_shape_alt_text(inline_shape: Any, alt_text: str) -> None:
+    doc_pr = inline_shape._inline.docPr
+    doc_pr.set("descr", alt_text)
+    doc_pr.set("title", alt_text)
+
+
 def load_profile_from_json(path: Path) -> UserProfile:
     with path.open("r", encoding="utf-8") as handle:
         payload = json.load(handle)
@@ -147,6 +157,9 @@ def load_profile_from_json(path: Path) -> UserProfile:
         email=field("email"),
         late_fees=field("late_fees"),
         payment_instructions=field("payment_instructions"),
+        logo_path=field("logo_path"),
+        logo_width_inches=float(payload.get("logo_width_inches", 1.5)),
+        logo_alt_text=str(payload.get("logo_alt_text", "M3 Logo")).strip(),
     )
 
 
@@ -172,6 +185,9 @@ def load_profile_from_legacy_module(path: Path) -> UserProfile:
         email=attr("userEmail", required=True),
         late_fees=attr("userLateFees"),
         payment_instructions=attr("userPay"),
+        logo_path=attr("userLogoPath"),
+        logo_width_inches=float(getattr(module, "userLogoWidthInches", 1.5)),
+        logo_alt_text=attr("userLogoAltText") or "M3 Logo",
     )
 
 
@@ -240,20 +256,43 @@ def gather_invoice_data() -> InvoiceData:
 def write_invoice_docx(profile: UserProfile, invoice: InvoiceData, out_path: Path) -> None:
     document = Document()
 
-    title = document.add_heading().add_run(profile.name)
+    top = document.add_table(rows=1, cols=2)
+    left_cell, right_cell = top.rows[0].cells
+
+    name_p = left_cell.paragraphs[0]
+    title = name_p.add_run(profile.name)
     apply_run_style(title, size=18)
 
-    header = document.add_paragraph()
     header_text = (
         f"{profile.street_address}\n"
         f"{profile.city_state_zip}\n"
         f"{profile.phone}\n"
         f"{profile.email}\n"
     )
+    header = left_cell.add_paragraph()
     header_run = header.add_run(header_text)
     apply_run_style(header_run)
 
     document.add_paragraph()
+
+    logo_path = profile.logo_path.strip()
+    if logo_path:
+        logo_width = profile.logo_width_inches
+        logo_alt = profile.logo_alt_text.strip()
+        if not logo_alt:
+            raise InvoiceratorError("Logo alt text is required when userLogoPath is set.")
+
+        resolved_logo_path = Path(logo_path).expanduser()
+        if not resolved_logo_path.is_absolute():
+            resolved_logo_path = Path.cwd() / resolved_logo_path
+        if not resolved_logo_path.exists():
+            raise InvoiceratorError(f"Logo file not found: {resolved_logo_path}")
+
+        logo_p = right_cell.paragraphs[0]
+        logo_p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+        logo_run = logo_p.add_run()
+        inline_shape = logo_run.add_picture(str(resolved_logo_path), width=Inches(float(logo_width)))
+        set_inline_shape_alt_text(inline_shape, logo_alt)
 
     invoice_heading = document.add_heading("INVOICE", level=2)
     invoice_heading.alignment = WD_ALIGN_PARAGRAPH.CENTER
