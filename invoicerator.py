@@ -136,7 +136,7 @@ def apply_run_style(run, *, bold: bool = False, size: int = 12) -> None:
 def set_inline_shape_alt_text(inline_shape: Any, alt_text: str) -> None:
     doc_pr = inline_shape._inline.docPr
     doc_pr.set("descr", alt_text)
-    doc_pr.set("title", alt_text)
+    doc_pr.set("title", "")
 
 
 def load_profile_from_json(path: Path) -> UserProfile:

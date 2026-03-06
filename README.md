@@ -14,17 +14,39 @@ pip install -r requirements.txt
 ```
 
 ## Profile Setup
-Legacy mode is supported with `userData.py`.
+You can use either profile format. JSON is recommended.
 
-Optional logo fields in `userData.py`:
-- `userLogoPath = ""`
-- `userLogoWidthInches = 1.5`
-- `userLogoAltText = "M3 Logo"`
+### JSON profile (recommended)
+1. Create your local profile file:
+
+```bash
+cp user_profile.example.json user_profile.json
+```
+
+2. Edit `user_profile.json` and fill in your values.
+3. `user_profile.json` is ignored by git and should stay local.
+
+### Legacy Python profile
+1. Create your local legacy profile file:
+
+```bash
+cp userData.example.py userData.py
+```
+
+2. Edit `userData.py` and fill in your values.
+3. `userData.py` is ignored by git and should stay local.
+
+### Optional logo fields
+Both profile formats support optional logo settings:
+- `logo_path` / `userLogoPath`
+- `logo_width_inches` / `userLogoWidthInches`
+- `logo_alt_text` / `userLogoAltText`
 
 Logo behavior:
-- If `userLogoPath` is empty, no logo is rendered.
-- If `userLogoPath` is set, logo alt text is required.
+- If logo path is empty, no logo is rendered.
+- If logo path is set, alt text is required.
 - The logo is placed in the top-right of a 2-column header table.
+- Accessibility metadata is written as image description (`descr`), with image title left empty to avoid duplicate announcements.
 
 ## Usage
 Run interactively:

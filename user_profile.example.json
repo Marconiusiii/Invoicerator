@@ -1,9 +1,12 @@
 {
-  "name": "Your Name",
-  "street_address": "123 Main St",
-  "city_state_zip": "City, ST 00000",
-  "phone": "555-555-5555",
-  "email": "you@example.com",
-  "late_fees": "Payment due within 30 days of invoice receipt.",
-  "payment_instructions": "Checks payable to Your Name."
+  "name": "",
+  "street_address": "",
+  "city_state_zip": "",
+  "phone": "",
+  "email": "",
+  "late_fees": "",
+  "payment_instructions": "",
+  "logo_path": "",
+  "logo_width_inches": 1.5,
+  "logo_alt_text": "M3 Logo"
 }
