@@ -77,6 +77,7 @@ Client,Acme Corp
 InvoiceNumber,2026-05-001
 HourlyRate,125
 SubmittedDate,05/15/2026
+Output,invoices/may-2026
 
 Date,Project,Hours
 05/01/2026,Accessibility audit prep,1.5
@@ -85,7 +86,9 @@ Date,Project,Hours
 ```
 
 Rules:
-- Required metadata keys: `Client`, `InvoiceNumber`, `HourlyRate`, `SubmittedDate`
+- Required metadata keys: `Client`, `InvoiceNumber`, `HourlyRate`, `SubmittedDate`, `Output`
+- The `Output` value is the output filename or path. `.docx` is appended automatically if needed.
+- `--output` overrides the CSV `Output` value when both are provided.
 - Entries header must be exactly: `Date,Project,Hours`
 - Date format: `MM/DD/YYYY`
 - Hours must be in `0.25` increments

@@ -3,6 +3,7 @@ Client,
 InvoiceNumber,
 HourlyRate,
 SubmittedDate,
+Output,
 
 Date,Project,Hours
 ,,

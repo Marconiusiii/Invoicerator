@@ -49,6 +49,7 @@ class InvoiceData:
     due_date: str
     hourly_rate: Decimal
     entries: list[InvoiceEntry]
+    output_path: Optional[Path] = None
 
     @property
     def total_hours(self) -> Decimal:
@@ -331,7 +332,7 @@ def load_invoice_data_from_csv(csv_path: Path) -> InvoiceData:
     if not entries:
         raise InvoiceratorError("CSV must include at least one line item.")
 
-    required_keys = ["Client", "InvoiceNumber", "HourlyRate", "SubmittedDate"]
+    required_keys = ["Client", "InvoiceNumber", "HourlyRate", "SubmittedDate", "Output"]
     missing = [key for key in required_keys if not str(metadata.get(key, "")).strip()]
     if missing:
         raise InvoiceratorError(f"CSV metadata missing required keys: {', '.join(missing)}")
@@ -348,6 +349,7 @@ def load_invoice_data_from_csv(csv_path: Path) -> InvoiceData:
         due_date=due_date,
         hourly_rate=hourly_rate,
         entries=entries,
+        output_path=Path(metadata["Output"].strip()),
     )
 
 
@@ -497,6 +499,8 @@ def main(argv: Optional[Iterable[str]] = None) -> int:
         invoice = load_invoice_data_from_csv(args.csv) if args.csv else gather_invoice_data()
 
         out_path = args.output
+        if out_path is None and invoice.output_path is not None:
+            out_path = invoice.output_path
         if out_path is None:
             out_path = Path(prompt_text("Output filename (.docx appended automatically if needed)"))
 
