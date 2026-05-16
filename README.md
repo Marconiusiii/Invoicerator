@@ -4,6 +4,7 @@ Python-based invoice generator for Terminal that outputs Word `.docx` files.
 ## Current Behavior
 - Builds invoice documents with `python-docx`.
 - Runs as an interactive CLI workflow in Terminal.
+- Supports full CSV-driven invoice data entry with `--csv`.
 - Does not perform PDF conversion.
 
 ## Dependencies
@@ -55,20 +56,40 @@ Run interactively:
 python3 invoicerator.py
 ```
 
+Run from CSV:
+
+```bash
+python3 invoicerator.py --csv invoice_entries.example.csv
+```
+
+Use explicit output file:
+
+```bash
+python3 invoicerator.py --csv invoice_entries.example.csv --output invoices/may-2026.docx
+```
+
+## CSV Format
+Use one CSV file with two sections: metadata and entries, separated by a blank line.
+
+```csv
+Key,Value
+Client,Acme Corp
+InvoiceNumber,2026-05-001
+HourlyRate,125
+SubmittedDate,05/15/2026
+
+Date,Project,Hours
+05/01/2026,Accessibility audit prep,1.5
+05/03/2026,Client meeting,0.75
+05/04/2026,Invoice revision,2.0
+```
+
+Rules:
+- Required metadata keys: `Client`, `InvoiceNumber`, `HourlyRate`, `SubmittedDate`
+- Entries header must be exactly: `Date,Project,Hours`
+- Date format: `MM/DD/YYYY`
+- Hours must be in `0.25` increments
+- If project text contains commas, quote the field
+
 ## Notes On PDF
 This script only generates `.docx` invoices. PDF export remains a separate step in Word.
-
-## What Improved
-- Cleaner structure with dedicated functions and dataclasses.
-- Centralized input and validation logic.
-- `Decimal` arithmetic for money and hours.
-- Better error handling for missing profile data and invalid input.
-- Backward compatibility with existing `userData.py`.
-- Automatic due date calculation from submitted date plus 30 days.
-- Optional logo support with required alt text when logo is enabled.
-
-## Roadmap Ideas
-1. Add optional non-interactive flags for faster repeated invoicing.
-2. Add tests for math and input validation.
-3. Add stored invoice history and automatic invoice numbering.
-4. Add CSV import for time entries.

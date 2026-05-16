@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import csv
 import importlib.util
 import json
 from dataclasses import dataclass
@@ -62,6 +63,32 @@ class InvoiceratorError(RuntimeError):
     pass
 
 
+def parse_date(value: str, field_name: str) -> datetime:
+    try:
+        return datetime.strptime(value, "%m/%d/%Y")
+    except ValueError as exc:
+        raise InvoiceratorError(
+            f"Invalid {field_name}: {value}. Use MM/DD/YYYY format."
+        ) from exc
+
+
+def parse_non_negative_decimal(value: str, field_name: str) -> Decimal:
+    try:
+        number = Decimal(value)
+    except InvalidOperation as exc:
+        raise InvoiceratorError(f"Invalid {field_name}: {value}") from exc
+    if number < 0:
+        raise InvoiceratorError(f"{field_name} cannot be negative.")
+    return number
+
+
+def parse_quarter_hours(value: str, field_name: str = "Hours") -> Decimal:
+    hours = parse_non_negative_decimal(value, field_name)
+    if (hours * 100) % 25 != 0:
+        raise InvoiceratorError(f"{field_name} must be in 0.25 increments.")
+    return hours
+
+
 def prompt_text(label: str, *, required: bool = True, default: Optional[str] = None) -> str:
     while True:
         raw = input(f"{label}: ").strip()
@@ -89,22 +116,19 @@ def prompt_decimal(label: str) -> Decimal:
     while True:
         value = input(f"{label}: ").strip()
         try:
-            number = Decimal(value)
-        except InvalidOperation:
+            number = parse_non_negative_decimal(value, label)
+        except InvoiceratorError:
             print("Enter a valid number (example: 75 or 75.00).")
             continue
-
-        if number < 0:
-            print("Value cannot be negative.")
-            continue
-
         return number
 
 
 def prompt_quarter_hours(label: str) -> Decimal:
     while True:
-        hours = prompt_decimal(label)
-        if (hours * 100) % 25 != 0:
+        value = input(f"{label}: ").strip()
+        try:
+            hours = parse_quarter_hours(value, label)
+        except InvoiceratorError:
             print("Hours must be in 0.25 increments (example: 1.25).")
             continue
         return hours
@@ -239,7 +263,7 @@ def gather_invoice_data() -> InvoiceData:
 
     hourly_rate = prompt_decimal("Hourly rate")
     submitted_date = prompt_date("Date submitted", default=today)
-    submitted_dt = datetime.strptime(submitted_date, "%m/%d/%Y")
+    submitted_dt = parse_date(submitted_date, "SubmittedDate")
     due_date = (submitted_dt + timedelta(days=DEFAULT_DUE_DAYS)).strftime("%m/%d/%Y")
     print(f"Payment due date ({DEFAULT_DUE_DAYS} days): {due_date}")
 
@@ -247,6 +271,80 @@ def gather_invoice_data() -> InvoiceData:
         client=client,
         invoice_number=invoice_number,
         submitted_date=submitted_date,
+        due_date=due_date,
+        hourly_rate=hourly_rate,
+        entries=entries,
+    )
+
+
+def load_invoice_data_from_csv(csv_path: Path) -> InvoiceData:
+    if not csv_path.exists():
+        raise InvoiceratorError(f"CSV file not found: {csv_path}")
+
+    with csv_path.open("r", encoding="utf-8-sig", newline="") as handle:
+        rows = [row for row in csv.reader(handle)]
+
+    if not rows:
+        raise InvoiceratorError("CSV file is empty.")
+
+    metadata: dict[str, str] = {}
+    idx = 0
+    while idx < len(rows):
+        row = [cell.strip() for cell in rows[idx]]
+        if not any(row):
+            idx += 1
+            break
+        if len(row) < 2:
+            raise InvoiceratorError("Metadata rows must have two columns: Key,Value")
+        key = row[0]
+        if key.lower() == "key":
+            idx += 1
+            continue
+        metadata[key] = row[1]
+        idx += 1
+
+    if idx >= len(rows):
+        raise InvoiceratorError("CSV is missing entries section.")
+
+    entries_header = [cell.strip().lower() for cell in rows[idx]]
+    if entries_header != ["date", "project", "hours"]:
+        raise InvoiceratorError("Entries header must be: Date,Project,Hours")
+    idx += 1
+
+    entries: list[InvoiceEntry] = []
+    while idx < len(rows):
+        row = rows[idx]
+        idx += 1
+        if not any(cell.strip() for cell in row):
+            continue
+        if len(row) < 3:
+            raise InvoiceratorError("Each entry row must have Date,Project,Hours.")
+        service_date = row[0].strip()
+        project = row[1].strip()
+        hours_raw = row[2].strip()
+        if not project:
+            raise InvoiceratorError("Project cannot be empty in entries.")
+        parse_date(service_date, "Date")
+        hours = parse_quarter_hours(hours_raw, "Hours")
+        entries.append(InvoiceEntry(service_date=service_date, project=project, hours=hours))
+
+    if not entries:
+        raise InvoiceratorError("CSV must include at least one line item.")
+
+    required_keys = ["Client", "InvoiceNumber", "HourlyRate", "SubmittedDate"]
+    missing = [key for key in required_keys if not str(metadata.get(key, "")).strip()]
+    if missing:
+        raise InvoiceratorError(f"CSV metadata missing required keys: {', '.join(missing)}")
+
+    hourly_rate = parse_non_negative_decimal(metadata["HourlyRate"].strip(), "HourlyRate")
+    submitted_dt = parse_date(metadata["SubmittedDate"].strip(), "SubmittedDate")
+    due_date = (submitted_dt + timedelta(days=DEFAULT_DUE_DAYS)).strftime("%m/%d/%Y")
+    print(f"Payment due date ({DEFAULT_DUE_DAYS} days): {due_date}")
+
+    return InvoiceData(
+        client=metadata["Client"].strip(),
+        invoice_number=metadata["InvoiceNumber"].strip(),
+        submitted_date=metadata["SubmittedDate"].strip(),
         due_date=due_date,
         hourly_rate=hourly_rate,
         entries=entries,
@@ -373,6 +471,12 @@ def parse_args(argv: Optional[Iterable[str]] = None) -> argparse.Namespace:
         default=None,
         help="Output DOCX path. If omitted, you'll be prompted.",
     )
+    parser.add_argument(
+        "--csv",
+        type=Path,
+        default=None,
+        help="Path to CSV file with metadata + entries sections.",
+    )
     return parser.parse_args(argv)
 
 
@@ -390,7 +494,7 @@ def main(argv: Optional[Iterable[str]] = None) -> int:
         print("Generate invoice DOCX files from Terminal.")
 
         profile = load_profile(args.profile)
-        invoice = gather_invoice_data()
+        invoice = load_invoice_data_from_csv(args.csv) if args.csv else gather_invoice_data()
 
         out_path = args.output
         if out_path is None:
